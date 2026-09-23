@@ -1,4 +1,4 @@
-from nfl_project.database import engine
+from data.database import engine
 
 
 def loadb(pbp_plays):

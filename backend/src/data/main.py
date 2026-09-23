@@ -1,7 +1,7 @@
 from sqlalchemy import text
-from nfl_project.database import engine
-from nfl_project.process import process_pbp
-from nfl_project.loadb import loadb
+from data.database import engine
+from data.process import process_pbp
+from data.loadb import loadb
 
 def main():
     with engine.connect() as conn:
