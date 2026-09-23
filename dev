@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+# Each checkout gets its own dependencies, including separate Git worktrees.
+project_id="$(printf '%s' "$project_dir" | cksum | cut -d ' ' -f 1)"
+container_name="capstone-dev-$project_id"
+node_image="docker.io/library/node:24-bookworm-slim"
+
+if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
+  cat <<EOF
+Usage: ./dev [dev | command [args...]]
+
+  ./dev npm ci          Install dependencies from package-lock.json
+  ./dev                 Start Vite at http://localhost:5173
+  ./dev npm run lint    Run Oxlint
+  ./dev npm run build   Type-check and build into dist/
+  ./dev bash            Open a container terminal
+
+Set PODMAN_DEV_PORT to change the host port (default: 5173).
+Development container: $container_name
+EOF
+  exit 0
+fi
+
+if ! command -v podman >/dev/null 2>&1; then
+  printf 'Podman is required. Install it and verify that podman info works.\n' >&2
+  exit 1
+fi
+if [[ "$(id -u)" == 0 ]]; then
+  printf 'Run ./dev as your regular user so Podman runs rootless.\n' >&2
+  exit 1
+fi
+
+podman_args=(
+  --rm --init --interactive
+  --userns keep-id
+  --cap-drop all
+  --security-opt no-new-privileges
+  --workdir /workspace
+  --env npm_config_cache=/tmp/npm-cache
+  --volume "$project_dir:/workspace:z"
+)
+if [[ -t 0 && -t 1 ]]; then
+  podman_args+=(--tty)
+fi
+
+if [[ "${1:-dev}" == dev ]]; then
+  if [[ $# -gt 0 ]]; then shift; fi
+  podman_args+=(
+    --name "$container_name"
+    --publish "127.0.0.1:${PODMAN_DEV_PORT:-5173}:5173"
+  )
+  set -- npm run dev -- --host 0.0.0.0 --port 5173 --strictPort "$@"
+fi
+
+exec podman run "${podman_args[@]}" "$node_image" "$@"
