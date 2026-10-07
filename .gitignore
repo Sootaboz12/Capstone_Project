@@ -24,8 +24,14 @@ dist-ssr
 *.sln
 *.sw?
 
-# python 
+# Python
 .env
+.env.*
+!.env.example
 .venv/
 __pycache__/
-*.pyc
+*.py[oc]
+.ipynb_checkpoints/
+build/
+wheels/
+*.egg-info/
