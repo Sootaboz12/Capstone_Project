@@ -8,3 +8,4 @@ def loadb(pbp_plays):
         if_table_exists="replace",
         engine="sqlalchemy",
     )
+    
