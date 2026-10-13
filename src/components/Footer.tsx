@@ -10,6 +10,7 @@ function Footer() {
         <nav>
           <Link to="/">Home</Link>
           <Link to="/predictor">Predictor</Link>
+          <Link to="/standings">Standings</Link>
           <Link to="/about">About</Link>
         </nav>
       </div>
