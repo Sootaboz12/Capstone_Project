@@ -82,6 +82,41 @@ export const teams: Team[] = [
   { id: 'sea', abbr: 'SEA', city: 'Seattle', name: 'Seahawks', stadium: 'Lumen Field', blurb: "The '12th Man' crowd noise fuels one of football's rowdiest home fields.", conference: 'NFC', division: 'West', colors: { primary: '#002244', secondary: '#69BE28' }, stats: mockStats(32) },
 ]
 
+export const teamLogos: Record<string, string> = {
+  ari: '/azcardinals-com-logo.png',
+  atl: '/atlantafalcons-com-logo.png',
+  bal: '/baltimoreravens-com-logo.png',
+  buf: '/buffalobills-com-logo.png',
+  car: '/panthers-com-logo.png',
+  chi: '/chicagobears-com-logo.png',
+  cin: '/bengals-com-logo.png',
+  cle: '/clevelandbrowns-com-logo.png',
+  dal: '/dallascowboys-com-logo.png',
+  den: '/denverbroncos-com-logo.png',
+  det: '/detroitlions-com-logo.png',
+  gb: '/packers-com-logo.png',
+  hou: '/houstontexans-com-logo.png',
+  ind: '/colts-com-logo.png',
+  jax: '/jaguars-com-logo.png',
+  kc: '/chiefs-com-logo.png',
+  lv: '/raiders-com-logo.png',
+  lac: '/chargers-com-logo.png',
+  lar: '/therams-com-logo.png',
+  mia: '/miamidolphins-com-logo.png',
+  min: '/vikings-com-logo.png',
+  ne: '/patriots-com-logo.png',
+  no: '/neworleanssaints-com-logo.png',
+  nyg: '/giants-com-logo.png',
+  nyj: '/newyorkjets-com-logo.png',
+  phi: '/philadelphiaeagles-com-logo.png',
+  pit: '/steelers-com-logo.png',
+  sf: '/49ers-com-logo.png',
+  sea: '/seahawks-com-logo.png',
+  tb: '/buccaneers-com-logo.png',
+  ten: '/titansonline-com-logo.png',
+  was: '/commanders-com-logo.png',
+}
+
 export function getTeam(id: string): Team | undefined {
   return teams.find((t) => t.id === id)
 }

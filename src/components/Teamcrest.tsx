@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import { useState } from 'react'
-import type { Team } from '../data/teams'
+import { teamLogos, type Team } from '../data/teams'
 
 interface TeamCrestProps {
   team: Team
@@ -10,7 +10,8 @@ interface TeamCrestProps {
 
 function TeamCrest({ team, size = 'md', logoUrl }: TeamCrestProps) {
   const [imgFailed, setImgFailed] = useState(false)
-  const showImage = Boolean(logoUrl) && !imgFailed
+  const resolvedLogoUrl = teamLogos[team.id] ?? logoUrl
+  const showImage = Boolean(resolvedLogoUrl) && !imgFailed
 
   return (
     <div
@@ -24,7 +25,7 @@ function TeamCrest({ team, size = 'md', logoUrl }: TeamCrestProps) {
     >
       {showImage ? (
         <img
-          src={logoUrl}
+          src={resolvedLogoUrl}
           alt={`${team.city} ${team.name} logo`}
           className="crest__image"
           loading="lazy"
