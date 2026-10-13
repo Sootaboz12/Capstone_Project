@@ -18,11 +18,14 @@ dependencies = [
 ]
 
 [project.scripts]
-backend = "data.main:main"
-ping = "data.ping_supabase:main"
+backend = "db.main:main"
+ping = "db.ping_supabase:main"
 [build-system]
 requires = ["uv_build>=0.12.17,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "db"
 
 [dependency-groups]
 dev = [

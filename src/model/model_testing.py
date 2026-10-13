@@ -21,7 +21,7 @@ print(sys.executable)
 # %load_ext autoreload
 # %autoreload 2
 
-from data.process import process_pbp, create_model_df
+from db.process import process_pbp, create_model_df
 
 # %%
 import pandas as pd

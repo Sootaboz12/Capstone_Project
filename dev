@@ -22,12 +22,14 @@ Build the image first (from the project root):
   ./dev bash            Open a container terminal
 
 Notebook workflow (from the project root):
-  Edit on the host:     nvim backend/model_testing.py
-  Sync after editing:  ./dev uv run --project backend jupytext --sync backend/model_testing.py
-  Run the model:       ./dev uv run --project backend python backend/model_testing.py
+  Edit on the host:     nvim src/model/model_testing.py
+  Sync after editing:  ./dev uv run jupytext --sync src/model/model_testing.py
+  Run the model:       ./dev uv run python src/model/model_testing.py
 
 Saving the Python file does not update the notebook automatically; run sync
 after editing either file to update the pair before running or committing.
+Agents must get explicit user permission before running the model; it uses
+substantial resources. Notebook sync does not execute the model.
 
 Set PODMAN_DEV_PORT to change the host port (default: 5173).
 Development container: $container_name

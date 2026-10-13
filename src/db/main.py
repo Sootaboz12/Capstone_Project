@@ -1,7 +1,7 @@
 from sqlalchemy import text
-from data.database import engine
-from data.process import process_pbp
-from data.loadb import loadb
+from db.database import engine
+from db.process import process_pbp
+from db.loadb import loadb
 
 def main():
     with engine.connect() as conn:
