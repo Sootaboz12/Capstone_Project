@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
-from models.predict import predict_wp_dictionary
+from model.predict import predict_wp_dictionary
 import joblib
 
 app = FastAPI()
 
-model = joblib.load("src/models/model.pkl")
+model = joblib.load("src/model/model.pkl")
 
 class GameState(BaseModel):
     
