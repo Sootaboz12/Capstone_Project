@@ -28,7 +28,12 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "db"
 
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
 [dependency-groups]
 dev = [
     "jupytext>=1.19.6",
+    "pandas-stubs>=3.0.5.260914",
 ]
