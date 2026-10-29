@@ -22,6 +22,7 @@ print(sys.executable)
 # %autoreload 2
 
 from db.process import process_pbp, create_model_df
+import joblib
 
 # %%
 import pandas as pd
@@ -52,15 +53,16 @@ features = [
     "game_seconds_remaining",
     "down",
     "ydstogo",
-    "yardline_100",
+    "home_yardline_100",
     "home_win"
 ]
 model_data = pbp_pandas[features].dropna()
 features = [
+    ""
     "game_seconds_remaining",
     "down",
     "ydstogo",
-    "yardline_100",
+    "home_yardline_100",
 ]
 X = model_data[features]
 y = model_data["home_win"]
@@ -76,15 +78,14 @@ model.fit(X, y)
 model.predict_proba(X)
 
 # %%
-print(
-    pbp_pandas[
-        ["game_id",
-         "total_home_score",
-         "total_away_score",
-         "result",
-         "home_win"]
-    ].head(400).to_string()
-)
+# print(
+#     pbp_pandas[
+#         ["game_id",
+#          "score_diff",
+#          "result",
+#          "home_win"]
+#     ].head(400).to_string()
+# )
 
 
 # %%
@@ -94,7 +95,7 @@ def predict_wp_dictionary(model, game_state):
         "game_seconds_remaining",
         "down",
         "ydstogo",
-        "yardline_100"
+        "home_yardline_100"
     ]
 
     X = pd.DataFrame([game_state])[features]
@@ -112,7 +113,7 @@ gs1 = {
     "game_seconds_remaining": 600,
     "down": 2,
     "ydstogo": 6,
-    "yardline_100": 45,
+    "home_yardline_100": 45,
 }
 
 
@@ -129,7 +130,7 @@ def predict_wp_array(model, game_state):
         "game_seconds_remaining",
         "down",
         "ydstogo",
-        "yardline_100",
+        "home_yardline_100",
         ]
     )
 
@@ -163,6 +164,8 @@ model2= LogisticRegression()
 
 # %%
 model.fit(X_train, y_train)
+
+joblib.dump(model, "src/models/model.pkl")
 
 # %%
 test_probs = model.predict_proba(X_test)

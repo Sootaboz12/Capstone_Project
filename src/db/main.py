@@ -1,6 +1,6 @@
 from sqlalchemy import text
 from db.database import engine
-from db.process import process_pbp
+from db.standings import update_standings
 from db.loadb import loadb
 
 def main():
@@ -8,7 +8,11 @@ def main():
         result = conn.execute(text("SELECT 1"))
         print(result.scalar())
         
-    pbp_plays = process_pbp()
+    update = update_standings()
 
-    loadb(pbp_plays)
+    loadb(update)
     print("Finished loading")
+
+if __name__ == "__main__":
+    main()
+    

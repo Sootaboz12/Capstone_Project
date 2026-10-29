@@ -1,0 +1,76 @@
+\documentclass[conference]{IEEEtran}
+
+\begin{document}
+
+\title{Group 7 Project Abstract}
+
+\author{
+    \IEEEauthorblockN{Mohammad Islam, Macy Narang, Ken Jiang, and Jinxin Lin}
+    \IEEEauthorblockA{
+        \textit{Computer Science} \\
+        \textit{CUNY Hunter College} \\
+        mohammad.islam47@login.cuny.edu,\quad macy.narang99@login.cuny.edu \\
+        ken.jiang24@login.cuny.edu,\quad jinxin.lin07@login.cuny.edu
+    }
+}
+
+\maketitle
+
+% Coarsely equalize the final columns as described in IEEEtran_HOWTO.
+% Recheck this adjustment if the text changes.
+\enlargethispage{-12.5\baselineskip}
+
+\section{Introduction}
+Several methods for estimating the win probability of a specific NFL team given
+only the current state of an ongoing game are already widely used in sports
+analytics. However, such calculations of win probability are not informative of
+how that probability could change across the range of possible next plays and
+their outcomes. Thus, the aim of this project is to address this problem by
+estimating a distribution of win probabilities conditional on plausible next
+plays. This service will be delivered through a web tool that can be used by
+general audiences, professional analysts, and NFL personnel alike.
+
+\section{Proposed Approach}
+The models that calculate the probabilities mentioned above will be trained on
+game-state data---including down, distance, time remaining, etc.---obtained from
+datasets of historical NFL play-by-play data up to and including this season.
+The models may be built using neural networks or empirical methods, and we will
+evaluate their performance. The final model(s) should take vectors of live
+game-state information obtained through web scraping as input, and deliver
+estimated win probabilities corresponding to plausible play types as output.
+The model(s) will be integrated into a web tool that allows users to make inputs
+to the model by selecting an ongoing game and importing that game's live state,
+or by manually entering information in fields that correspond to the model's
+input variables. Upon receiving user
+input, the webpage will display the resulting win probabilities associated with
+each model.
+
+\section{Intended Outcome}
+If the models and web tool work as intended, they will give users insight into
+how win probability changes throughout a game depending on what plays are called.
+Thus, this tool can be used to assist football coaches in their play-making
+decisions, for educational purposes among fans and new coaching personnel, and
+to satisfy general curiosity among users. In certain situations, it could even
+give people who participate in prediction markets an edge. If a trader has
+already made an input to the web tool before a play has been completed, and if they
+can then recognize what type of play is unfolding in real time, they would be
+able to change how they are trading in response to the win probability
+displayed on our website that is associated with that type of play. To further
+aid users in usage and understanding of our win probability estimates, we will
+display information and statistics about the players on the offensive team
+that are relevant to the most successful play types, recent head-to-head matchup
+data between the teams, and team rankings and statistics, among other things.
+This data can be obtained using datasets, APIs, or web scraping.
+
+\section{Conclusion}
+Regardless of the setting, whether it be trading, education, or coaching, the
+models' estimates should not override informed decision-making or replace
+cognitive reasoning, but instead assist in them. Thus, the way in which the
+tool is presented and curated should encourage users to think about how the
+win probabilities should be considered within the context of the game state
+they correspond to. This philosophy will inform our approach to designing the
+website. If this approach is successful, our tool should be ready for
+responsible and informed usage for multiple purposes by a wide range of people
+among the millions that are interested in American football.
+
+\end{document}

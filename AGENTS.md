@@ -2,6 +2,9 @@
 
 Read `README.md` for the project layout, setup, and validation commands.
 
+Use type hints in new or edited Python code, including structured types for
+dictionary inputs with known fields rather than a bare `dict`.
+
 **Running the model requires explicit user permission because it uses substantial
 resources.** This includes running experiment scripts, executing model notebook
 cells, and importing scripts that run the model at import time. Cleanup, refactoring,

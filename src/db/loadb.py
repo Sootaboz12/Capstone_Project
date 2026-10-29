@@ -1,9 +1,9 @@
 from db.database import engine
 
 
-def loadb(pbp_plays):
-    pbp_plays.write_database(
-        table_name="plays",
+def loadb(update_standings):
+    update_standings.write_database(
+        table_name="standings",
         connection=engine,
         if_table_exists="replace",
         engine="sqlalchemy",
