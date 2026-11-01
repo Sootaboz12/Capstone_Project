@@ -1,8 +1,20 @@
 import nflreadpy as nfl
 import polars as pl
 
-def update_standings():
+# streak function to increment/decrement and set streak back to 1 / -1
+def update_streak(streaks, team, won):
     
+    current = streaks.get(team, 0)
+    
+    if won:
+        streaks[team] = max(current, 0) + 1
+    else:
+        streaks[team] = min(current, 0) - 1
+    
+
+def update_standings():
+    streaks = {}
+
     season = nfl.get_current_season()
     sch = nfl.load_schedules(season)
     teams = nfl.load_teams()
@@ -13,6 +25,30 @@ def update_standings():
         & pl.col("away_score").is_not_null()
     )
     
+    sch = sch.sort(["gameday", "gametime"])
+    
+    print(sch.head(10))
+    
+    for game in sch.iter_rows(named=True):
+        home = game["home_team"]
+        away = game["away_team"]
+        
+        home_score = game["home_score"]
+        away_score = game["away_score"]
+        
+        # ignore games that haven't happened
+        if home_score is None or away_score is None:
+            continue
+
+        # ignore ties
+        if home_score == away_score:
+            streaks[home] = 0
+            streaks[away] = 0
+            continue       
+            
+        update_streak(streaks, home, home_score > away_score)
+        update_streak(streaks, away, away_score > home_score)
+        
     home = sch.select(
         pl.col("home_team").alias("team"),
         (pl.col("home_score") > pl.col("away_score")).cast(pl.Int8).alias("wins"),
@@ -120,9 +156,25 @@ def update_standings():
             "away_wins",
             "away_losses"
         )
-    )  
+    )
+    standings = standings.with_columns(
+        pl.col("team")
+        .replace_strict(streaks, default=0)
+        .alias("streak")
+    )
+    
+    standings = standings.with_columns(
+        pl.when(pl.col("streak") > 0)
+        .then(pl.format("W{}", pl.col("streak")))
+        .when(pl.col("streak") < 0)
+        .then(pl.format("L{}", pl.col("streak").abs()))
+        .otherwise(pl.lit("-"))
+        .alias("streak")
+    )
+      
     pl.Config.set_tbl_cols(-1)
-    print(standings.head(10))
+    pl.Config.set_tbl_rows(-1)
+    print(standings.head(32))
     return standings
 
 if __name__ == "__main__":
