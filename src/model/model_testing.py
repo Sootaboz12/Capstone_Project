@@ -21,7 +21,7 @@ print(sys.executable)
 # %load_ext autoreload
 # %autoreload 2
 
-from db.process import process_pbp, create_model_df
+from db.data_model_1 import process_pbp, create_model_df
 import joblib
 
 # %%
@@ -165,13 +165,10 @@ model2= LogisticRegression()
 # %%
 model.fit(X_train, y_train)
 
-joblib.dump(model, "src/models/model.pkl")
+joblib.dump(model, "src/model/old_model.pkl")
 
 # %%
 test_probs = model.predict_proba(X_test)
-
-# %%
-test_probs
 
 # %%
 from sklearn.metrics import brier_score_loss

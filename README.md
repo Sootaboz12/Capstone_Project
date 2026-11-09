@@ -57,26 +57,40 @@ Load the play-by-play data:
 The loader downloads all available seasons using nflreadpy, keeps play events,
 and **replaces the `plays` table**. Run it only when you intend to replace that data.
 
-## Model experiments
+## Notebooks
 
-`src/model/model_testing.py` and `src/model/model_testing.ipynb` are a Jupytext pair.
-Edit either file, then sync them before committing. Sync does not execute the model:
-
-```sh
-./dev uv run --locked jupytext --sync src/model/model_testing.py
-```
+Run these commands from the repo root after completing the development setup.
+Replace `path/to/notebook.ipynb` with your notebook's path. Without the container,
+omit `./dev`. Conversion and sync do not execute code.
 
 > [!WARNING]
 > Running the model uses substantial resources.
 
-To run the experiment:
+### Convert to Python
 
 ```sh
-./dev uv run --locked python src/model/model_testing.py
+./dev uv run --locked jupytext --to py path/to/notebook.ipynb
 ```
 
-The experiment downloads NFL data and trains logistic regression models without
-using the database.
+The generated `.py` file appears beside the notebook with the same base name.
+
+### Keep both files in sync
+
+To keep editing both formats, pair the notebook with a Python file once:
+
+```sh
+./dev uv run --locked jupytext --set-formats ipynb,py:percent path/to/notebook.ipynb
+```
+
+Then edit either file and sync the pair:
+
+```sh
+./dev uv run --locked jupytext --sync path/to/notebook.ipynb
+```
+
+Sync uses the more recently modified version to update the pair. You can pass
+either file's path. Sync before switching formats or committing; it does not
+merge competing edits made to both files.
 
 ## Checks
 
