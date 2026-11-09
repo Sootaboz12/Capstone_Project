@@ -997,7 +997,7 @@ main {
 
 .standings__table {
   width: 100%;
-  min-width: 620px;
+  min-width: 1180px;
   border-collapse: collapse;
   text-align: left;
 
@@ -1072,6 +1072,17 @@ main {
   margin-top: 16px;
   font-size: 12px;
   font-style: italic;
+}
+
+.standings__status {
+  margin: 16px 0;
+  color: var(--alert);
+  font-size: 13px;
+}
+
+.standings__empty {
+  padding: 28px 14px !important;
+  text-align: center;
 }
 
 @media (max-width: 640px) {

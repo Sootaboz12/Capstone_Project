@@ -1,13 +1,31 @@
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import joblib
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
-from model.predict import predict_wp_dictionary
-import joblib
 from sqlalchemy import text
-from db.database import engine
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = PROJECT_ROOT / "src"
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+try:
+    from src.db.database import engine
+    from src.model.predict import predict_wp_dictionary
+except ImportError:  # pragma: no cover - fallback for direct script execution
+    from db.database import engine
+    from model.predict import predict_wp_dictionary
 
 app = FastAPI()
 
-model = joblib.load("src/model/model.pkl")
+model = joblib.load(SRC_ROOT / "model" / "model.pkl")
 
 class GameState(BaseModel):
     
@@ -33,9 +51,12 @@ def predict(game_state : GameState):
     
 @app.get("/standings")
 def get_standings():
+    if engine is None:
+        return []
+
     with engine.connect() as conn:
         result = conn.execute(
             text("SELECT * FROM standings")
         )
-        
+
     return [dict(row) for row in result.mappings()]

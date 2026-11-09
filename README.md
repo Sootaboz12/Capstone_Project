@@ -2,7 +2,7 @@
 
 CSCI 49900 capstone project for estimating NFL win probability from game situations.
 It includes NFL data preparation, a PostgreSQL loader, and a logistic regression
-experiment. The React app still uses the starter template and is not connected to either.
+experiment. The React app includes an NFL standings page backed by the FastAPI service.
 
 ## Layout
 
@@ -31,12 +31,16 @@ Open <http://localhost:5173>. Set `PODMAN_DEV_PORT` to use a different host port
 Run `./dev` for an interactive Fish shell or `./dev --help` for command examples.
 
 For development without the container, install Node 24 and uv with Python 3.12,
-then run `npm ci`, `uv sync --locked`, and `npm run dev` directly.
+then run `npm ci`, `uv sync --locked`, and `npm run dev` directly. Start the API
+in a second terminal with `uv run --locked uvicorn src.api.main:app --reload --host 127.0.0.1 --port 8000`.
+The Vite development server proxies `/standings` to the API on port 8000, so both
+servers must be running to view standings.
 
 ## Database
 
 Copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL connection
-URL, using the `postgresql+psycopg://` scheme. Keep credentials out of Git.
+URL. Both `postgresql://` and `postgresql+psycopg://` are supported; the app uses
+the installed psycopg 3 driver. Keep credentials out of Git.
 
 Check connectivity:
 
