@@ -1,24 +1,44 @@
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
-from model.predict import predict_wp_dictionary
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+from typing import cast
+
 import joblib
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+import joblib
+import httpx
 from sqlalchemy import text
-from db.database import engine
+from sqlalchemy.engine import Engine
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = PROJECT_ROOT / "src"
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+try:
+    from src.db.database import engine
+    from src.model.predict import predict_wp_dictionary
+except ImportError:  # pragma: no cover - fallback for direct script execution
+    from db.database import engine
+    from model.predict import predict_wp_dictionary
+from model.predict import predict_wp_dictionary
+from model.next_play_model_testing import get_live_state
+from model.next_play_model_testing import predict_wp_by_play
+
+
 
 app = FastAPI()
 
-model = joblib.load("src/model/model.pkl")
+old_model = joblib.load(SRC_ROOT / "model" / "old_model.pkl")
+model = joblib.load("src/model/wp_play_model.joblib")
+ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
 
-class GameState(BaseModel):
-    
-    # total_home_score: int
-    # total_away_score: int
-    # qtr: int
-    # game_seconds_remaining: int
-    # yardline_100: int
-    # goal_to_go: int
-    # posteam_timeouts_remaining: int
-    # defteam_timeouts_remaining: int
+class oldGameState(BaseModel):
     
     game_seconds_remaining: int = Field(ge = 0, le = 3600)
     down: int = Field(ge = 0, le = 4)
@@ -92,7 +112,23 @@ def get_live_games():
     live_games = [
         {
             "id": game["id"],
-            "name": game["name"] 
+            "name": game["name"],
+            "away_team": next(
+                {
+                    "abbreviation": competitor["team"]["abbreviation"],
+                    "name": competitor["team"]["displayName"],
+                }
+                for competitor in game["competitions"][0]["competitors"]
+                if competitor["homeAway"] == "away"
+            ),
+            "home_team": next(
+                {
+                    "abbreviation": competitor["team"]["abbreviation"],
+                    "name": competitor["team"]["displayName"],
+                }
+                for competitor in game["competitions"][0]["competitors"]
+                if competitor["homeAway"] == "home"
+            ),
         }
         for game in games
         if game["status"]["type"]["state"] == "in"
@@ -106,7 +142,7 @@ def get_standings():
     if engine is None:
         return []
 
-    with engine.connect() as conn:
+    with cast(Engine, engine).connect() as conn:
         result = conn.execute(
             text("SELECT * FROM standings")
         )

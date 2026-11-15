@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import TrendingCarousel from '../components/TrendingCarousel'
+import LiveGamesCarousel from '../components/LiveGamesCarousel'
 import TeamGrid from '../components/Teamgrid'
 import { useNflLogos } from '../hooks/useNFLlogos'
 
@@ -27,9 +27,9 @@ function Landing() {
       </section>
 
       <section className="section" id="trending">
-        <p className="section-kicker">Trending today</p>
-        <h2 className="section-title">Games everyone's picking</h2>
-        <TrendingCarousel logos={logos} />
+        <p className="section-kicker">Live now</p>
+        <h2 className="section-title">Games in progress</h2>
+        <LiveGamesCarousel />
       </section>
 
       <section className="section" id="teams">

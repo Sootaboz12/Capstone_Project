@@ -33,8 +33,8 @@ Run `./dev` for an interactive Fish shell or `./dev --help` for command examples
 For development without the container, install Node 24 and uv with Python 3.12,
 then run `npm ci`, `uv sync --locked`, and `npm run dev` directly. Start the API
 in a second terminal with `uv run --locked uvicorn src.api.main:app --reload --host 127.0.0.1 --port 8000`.
-The Vite development server proxies `/standings` to the API on port 8000, so both
-servers must be running to view standings.
+The Vite development server proxies `/standings` and `/live_games` to the API on
+port 8000, so both servers must be running to view standings and live games.
 
 ## Database
 
