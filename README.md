@@ -34,8 +34,12 @@ Run `./dev` for an interactive Fish shell or `./dev --help` for command examples
 For development without the container, install Node 24 and uv with Python 3.12,
 then run `npm ci`, `uv sync --locked`, and `npm run dev` directly. Start the API
 in a second terminal with `uv run --locked uvicorn src.api.main:app --reload --host 127.0.0.1 --port 8000`.
-The Vite development server proxies `/standings` and `/live_games` to the API on
-port 8000, so both servers must be running to view standings and live games.
+Vite proxies standings, live games, replay data, and predictions to the API on port 8000.
+
+On the home page, choose a season, week, and matchup under **Past games**.
+Use **Previous play** and **Next play** to see model estimates for each replayable
+snap. Replay downloads the schedule and play-by-play data from nflverse and uses
+the saved model. It does not need PostgreSQL.
 
 ## Database
 

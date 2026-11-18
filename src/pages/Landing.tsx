@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import LiveGamesCarousel from '../components/LiveGamesCarousel'
+import PastGameReplay from '../components/PastGameReplay'
 import TeamGrid from '../components/Teamgrid'
 import { useNflLogos } from '../hooks/useNFLlogos'
 
@@ -30,6 +31,7 @@ function Landing() {
         <p className="section-kicker">Live now</p>
         <h2 className="section-title">Games in progress</h2>
         <LiveGamesCarousel />
+        <PastGameReplay />
       </section>
 
       <section className="section" id="teams">

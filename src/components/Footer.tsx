@@ -15,8 +15,7 @@ function Footer() {
         </nav>
       </div>
       <p className="footer__fine">
-        Placeholder framework — statistics and predictions shown are mock
-        data for demonstration only, not real sportsbook odds.
+        The matchup predictor uses mock team ratings. Past game replay shows model estimates.
       </p>
     </footer>
   )

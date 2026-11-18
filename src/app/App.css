@@ -492,6 +492,77 @@ main {
   }
 }
 
+/* ---------- Past game replay ---------- */
+
+.replay {
+  margin-top: 24px;
+  background: var(--panel);
+  border-radius: 22px;
+  padding: clamp(20px, 4vw, 44px);
+}
+
+.replay label {
+  display: grid;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  font-weight: 600;
+}
+
+.replay select {
+  max-width: 100%;
+}
+
+.replay__filters,
+.replay__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.replay__play {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.replay__controls button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+.replay__situation {
+  margin: 20px 0;
+}
+
+.replay__situation p {
+  margin: 4px 0;
+}
+
+.replay__predictions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+  gap: 10px;
+  max-width: 560px;
+  margin: 10px 0 0;
+}
+
+.replay__predictions div {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.replay__predictions dd {
+  margin: 4px 0 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- Team grid + cascade ---------- */
 
 .team-grid__cells {
