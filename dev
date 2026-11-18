@@ -15,7 +15,7 @@ Build the image first (from the project root):
   podman build --tag "$container_image" --file Containerfile.dev .
 
   ./dev                 Open a Fish container terminal
-  ./dev dev             Start Vite at http://localhost:5173
+  ./dev dev             Start FastAPI and Vite at http://localhost:5173
   ./dev npm ci          Install dependencies from package-lock.json
   ./dev npm run lint    Run Oxlint
   ./dev npm run build   Type-check and build into dist/
@@ -69,7 +69,10 @@ if [[ "${1:-}" == dev ]]; then
     --name "$container_name"
     --publish "127.0.0.1:${PODMAN_DEV_PORT:-5173}:5173"
   )
-  set -- npm run dev -- --host 0.0.0.0 --port 5173 --strictPort "$@"
+  set -- bash -c '
+    uv run --locked uvicorn src.api.main:app --host 127.0.0.1 --port 8000 &
+    exec npm run dev -- --host 0.0.0.0 --port 5173 --strictPort "$@"
+  ' dev-servers "$@"
 fi
 
 exec podman run "${podman_args[@]}" "$container_image" "$@"

@@ -27,7 +27,8 @@ podman build --tag localhost/capstone-dev:latest --file Containerfile.dev .
 ./dev dev
 ```
 
-Open <http://localhost:5173>. Set `PODMAN_DEV_PORT` to use a different host port.
+`./dev dev` starts FastAPI and Vite in the same container. Open
+<http://localhost:5173> when both servers are ready. Set `PODMAN_DEV_PORT` to use a different host port.
 Run `./dev` for an interactive Fish shell or `./dev --help` for command examples.
 
 For development without the container, install Node 24 and uv with Python 3.12,
