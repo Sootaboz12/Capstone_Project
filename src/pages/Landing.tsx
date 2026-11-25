@@ -1,48 +1,80 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import LiveGamesCarousel from '../components/LiveGamesCarousel'
 import PastGameReplay from '../components/PastGameReplay'
 import TeamGrid from '../components/Teamgrid'
 import { useNflLogos } from '../hooks/useNFLlogos'
+import stadiumImage from '../app/assets/sunday-brief-stadium.webp'
+import './SundayBrief.css'
+
+const matchups = [
+  { title: 'Bills vs. Dolphins', firstTeam: 'BUF', secondTeam: 'MIA', firstChance: 61 },
+  { title: 'Ravens vs. Eagles', firstTeam: 'BAL', secondTeam: 'PHI', firstChance: 54 },
+  { title: 'Bills vs. Ravens', firstTeam: 'BUF', secondTeam: 'BAL', firstChance: 46 },
+]
 
 function Landing() {
   const { logos } = useNflLogos()
+  const [matchupIndex, setMatchupIndex] = useState(0)
+  const { title, firstTeam, secondTeam, firstChance } = matchups[matchupIndex]
+  const secondChance = 100 - firstChance
 
   return (
-    <>
-      <section className="intro" id="top">
-        <span className="intro__ghost" aria-hidden="true">SPREAD</span>
-        <div className="intro__frame">
-          <p className="intro__kicker">Week 4 · Odds refresh every Tuesday</p>
-          <h1 className="intro__headline">
-            Today's most <em>searched</em> matchups, ranked by the crowd.
-          </h1>
-          <p className="intro__sub">
-            See what everyone's talking about before kickoff, then dig into
-            any team's numbers or line up your own head-to-head.
-          </p>
-          <div className="intro__actions">
-            <Link to="/predictor" className="btn btn--primary">Predict a matchup</Link>
-            <a href="#teams" className="btn btn--ghost">Browse team stats</a>
+    <div className="sunday-brief" id="top">
+      <header className="sunday-brief__masthead">
+        <h1>The Sunday Brief</h1>
+        <p>Explore NFL matchups</p>
+      </header>
+
+      <div className="sunday-brief__edition">
+        <article className="sunday-brief__lead" aria-labelledby="featured-matchup">
+          <img className="sunday-brief__stadium" src={stadiumImage} alt="" fetchPriority="high" />
+          <div aria-live="polite" aria-atomic="true">
+            <p className="sunday-brief__eyebrow">{matchupIndex === 0 ? 'Featured matchup' : 'Selected matchup'}</p>
+            <h2 id="featured-matchup">{title}</h2>
+            <div className="sunday-brief__chances">
+              <span className="sr-only">Win chances</span>
+              <span>{firstTeam} {firstChance}%</span>
+              <span className="sunday-brief__bar" aria-hidden="true">
+                <span style={{ width: `${firstChance}%` }} />
+              </span>
+              <span>{secondTeam} {secondChance}%</span>
+            </div>
           </div>
-        </div>
-      </section>
+          <p className="sunday-brief__eyebrow">Illustrative demo data</p>
+        </article>
 
-      <section className="section" id="trending">
-        <p className="section-kicker">Live now</p>
-        <h2 className="section-title">Games in progress</h2>
-        <LiveGamesCarousel />
-        <PastGameReplay />
-      </section>
+        <aside className="sunday-brief__sidebar" aria-labelledby="matchup-list">
+          <h2 id="matchup-list">Explore a matchup</h2>
+          <ul>
+            {matchups.map((matchup, index) => (
+              <li key={matchup.title}>
+                <button
+                  type="button"
+                  aria-pressed={matchupIndex === index}
+                  onClick={() => setMatchupIndex(index)}
+                >
+                  {matchup.title}<span aria-hidden="true">{matchupIndex === index ? '•' : '→'}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <section className="sunday-brief__live" id="trending" aria-labelledby="live-games">
+            <h3 id="live-games">Live games</h3>
+            <LiveGamesCarousel />
+          </section>
+          <div className="sunday-brief__links">
+            <Link to="/predictor">Predict a matchup <span aria-hidden="true">→</span></Link>
+            <a href="#teams">Browse teams <span aria-hidden="true">↓</span></a>
+          </div>
+        </aside>
+      </div>
 
-      <section className="section" id="teams">
-        <p className="section-kicker">Every franchise</p>
-        <h2 className="section-title">Tap a team to see who they are</h2>
-        <p className="section-sub">
-          Crests, hometowns, and a quick line on each team's identity.
-        </p>
+      <section className="sunday-brief__teams" id="teams" aria-labelledby="team-directory">
+        <h2 id="team-directory">Team directory</h2>
         <TeamGrid logos={logos} />
       </section>
-    </>
+    </div>
   )
 }
 

@@ -170,7 +170,7 @@ function LiveGamesCarousel() {
           </article>
         ) : (
           <p className="trending__card" role={error ? 'alert' : 'status'}>
-            {error ? `Could not load live games: ${error}` : 'No games are live right now.'}
+            {error ? 'Live games are temporarily unavailable.' : 'No games are live right now.'}
           </p>
         )}
 
