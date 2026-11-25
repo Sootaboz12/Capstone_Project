@@ -28,6 +28,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 
 
 PLAY_TYPES = ["run", "pass", "punt", "field_goal"]
+
 FEATURES = [
     "game_seconds_remaining",
     "half_seconds_remaining",
