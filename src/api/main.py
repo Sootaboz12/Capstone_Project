@@ -77,7 +77,7 @@ def oldpredict(game_state : oldGameState):
 def predict(game_state : GameState):
     game_dict = game_state.model_dump()
         
-    return predict_wp_by_play(model, game_dict).to_dict();
+    return predict_wp_by_play(model, game_dict).to_dict()
 
 # live game input prediction on model in next_play_model
 @app.post("/games/{event_id}/predict")
