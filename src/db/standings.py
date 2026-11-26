@@ -40,7 +40,6 @@ def update_standings():
         if home_score is None or away_score is None:
             continue
 
-        # ignore ties
         if home_score == away_score:
             streaks[home] = 0
             streaks[away] = 0
@@ -179,4 +178,12 @@ def update_standings():
 
 if __name__ == "__main__":
     update_standings()
+    sch = nfl.load_schedules()
+    print(sch.shape)
+    sch2 = nfl.load_pbp(seasons=True)
+    print(sch2.shape)
+    print(sch.estimated_size("mb"))
+    
+    print(sch2.estimated_size("mb"))
+
     

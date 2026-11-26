@@ -14,11 +14,13 @@ import polars as pl
 from fastapi import FastAPI, HTTPException, Query
 from nflreadpy.config import get_config, update_config
 from nflreadpy.utils_date import get_current_season
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, computed_field
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
 SRC_ROOT = PROJECT_ROOT / "src"
 
 if str(PROJECT_ROOT) not in sys.path:
@@ -28,13 +30,13 @@ if str(SRC_ROOT) not in sys.path:
 
 try:
     from src.db.database import engine
-    from src.model.predict import predict_wp_dictionary
+    from src.model.old_predict import predict_wp_dictionary
 except ImportError:  # pragma: no cover - fallback for direct script execution
     from db.database import engine
-    from model.predict import predict_wp_dictionary
-from model.predict import predict_wp_dictionary
-from model.next_play_model_testing import PLAY_TYPES, get_live_state, predict_wp_by_play
-
+    from model.old_predict import predict_wp_dictionary
+from model.old_predict import predict_wp_dictionary
+from model.get_live_state import get_live_state
+from model.predict_play import PLAY_TYPES, predict_wp_by_play
 
 
 app = FastAPI()
@@ -44,7 +46,9 @@ if "cache_mode" not in get_config().model_fields_set:
     update_config(cache_mode="filesystem")
 
 old_model = joblib.load(SRC_ROOT / "model" / "old_model.pkl")
-model = joblib.load("src/model/wp_play_model.joblib")
+
+model = joblib.load(SRC_ROOT / "model" / "wp_play_model.joblib")
+
 ESPN_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
 
 class oldGameState(BaseModel):
@@ -57,7 +61,7 @@ class oldGameState(BaseModel):
 class GameState(BaseModel):
 
     game_seconds_remaining: int = Field(ge = 0, le = 3600)
-    half_seconds_remaining: int = Field(ge=0, le=1800)
+    #half_seconds_remaining: int = Field(ge=0, le=1800)
     down: int = Field(ge = 0, le = 4)
     ydstogo: int = Field(ge = 1)
     yardline_100: int = Field(ge = 0, le = 100)
@@ -65,7 +69,20 @@ class GameState(BaseModel):
     posteam_timeouts_remaining: int = Field(ge=0, le=3)
     defteam_timeouts_remaining: int = Field(ge=0, le=3)
     posteam_is_home: bool
+    posteam_spread: float
     
+    @computed_field
+    @property
+    def half_seconds_remaining(self) -> int:
+        if self.game_seconds_remaining > 1800:
+            return self.game_seconds_remaining - 1800
+
+        return self.game_seconds_remaining
+
+@app.get("/")
+def root():
+    return {"message": "NFL Win Probability API is running"}
+
 # old prediction for first prototype
 @app.post("/predict/old")
 def oldpredict(game_state : oldGameState):
@@ -78,7 +95,7 @@ def oldpredict(game_state : oldGameState):
 def predict(game_state : GameState):
     game_dict = game_state.model_dump()
         
-    return predict_wp_by_play(model, game_dict).to_dict();
+    return predict_wp_by_play(model, game_dict).to_dict()
 
 # live game input prediction on model in next_play_model
 @app.post("/games/{event_id}/predict")
@@ -445,3 +462,18 @@ def get_standings():
 
     return [dict(row) for row in result.mappings()]
 
+game_state = GameState(
+    game_seconds_remaining=2400,
+    down=2,
+    ydstogo=6,
+    yardline_100=45,
+    score_differential=2,
+    posteam_timeouts_remaining=3,
+    defteam_timeouts_remaining=3,
+    posteam_is_home=True,
+    posteam_spread=3.0
+)
+
+game_dict = game_state.model_dump()
+
+print(game_dict)
