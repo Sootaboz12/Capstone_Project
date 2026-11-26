@@ -1,22 +1,21 @@
 import type { Team } from '../data/teams'
+import type { MatchupTeamStats } from '../libs/Predictions'
 
 interface StatsTableProps {
   teamA: Team
   teamB: Team
+  statsA: MatchupTeamStats
+  statsB: MatchupTeamStats
 }
 
-function StatsTable({ teamA, teamB }: StatsTableProps) {
+function StatsTable({ teamA, teamB, statsA, statsB }: StatsTableProps) {
   const rows: { label: string; a: string; b: string }[] = [
-    { label: 'Record', a: `${teamA.stats.wins}-${teamA.stats.losses}`, b: `${teamB.stats.wins}-${teamB.stats.losses}` },
-    { label: 'Streak', a: teamA.stats.streak, b: teamB.stats.streak },
-    { label: 'Power rank', a: `#${teamA.stats.powerRank}`, b: `#${teamB.stats.powerRank}` },
-    {
-      label: 'Turnover margin',
-      a: `${teamA.stats.turnoverMargin > 0 ? '+' : ''}${teamA.stats.turnoverMargin}`,
-      b: `${teamB.stats.turnoverMargin > 0 ? '+' : ''}${teamB.stats.turnoverMargin}`,
-    },
-    { label: 'Home record', a: teamA.stats.homeRecord, b: teamB.stats.homeRecord },
-    { label: 'Away record', a: teamA.stats.awayRecord, b: teamB.stats.awayRecord },
+    { label: 'Record', a: `${statsA.wins}-${statsA.losses}-${statsA.ties}`, b: `${statsB.wins}-${statsB.losses}-${statsB.ties}` },
+    { label: 'Win percentage', a: `${(statsA.win_pct * 100).toFixed(1)}%`, b: `${(statsB.win_pct * 100).toFixed(1)}%` },
+    { label: 'Points scored / game', a: statsA.points_for_per_game.toFixed(1), b: statsB.points_for_per_game.toFixed(1) },
+    { label: 'Points allowed / game', a: statsA.points_against_per_game.toFixed(1), b: statsB.points_against_per_game.toFixed(1) },
+    { label: 'Home record', a: `${statsA.home_wins}-${statsA.home_losses}-${statsA.home_ties}`, b: `${statsB.home_wins}-${statsB.home_losses}-${statsB.home_ties}` },
+    { label: 'Away record', a: `${statsA.away_wins}-${statsA.away_losses}-${statsA.away_ties}`, b: `${statsB.away_wins}-${statsB.away_losses}-${statsB.away_ties}` },
   ]
 
   return (

@@ -41,6 +41,13 @@ Use **Previous play** and **Next play** to see model estimates for each replayab
 snap. Replay downloads the schedule and play-by-play data from nflverse and uses
 the saved model. It does not need PostgreSQL.
 
+The matchup predictor uses completed regular-season schedules from nflverse to
+compare each team's scoring, record, and home/away performance. Its projected
+win chances combine those scoring averages with the selected venue and the
+season's observed home-field advantage and scoring-margin variation; they are
+statistical estimates rather than predictions from the in-game win-probability
+model.
+
 ## Database
 
 Copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL connection

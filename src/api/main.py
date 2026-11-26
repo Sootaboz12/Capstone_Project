@@ -3,8 +3,9 @@ from __future__ import annotations
 import re
 import sys
 from datetime import date
+from math import erf, sqrt
 from pathlib import Path
-from typing import Annotated, cast
+from typing import Annotated, TypedDict, cast
 
 import httpx
 import joblib
@@ -162,6 +163,98 @@ class PastPlay(BaseModel):
     state: GameState
 
 
+class MatchupTeamStats(BaseModel):
+    team: str
+    games: int
+    wins: int
+    losses: int
+    ties: int
+    points_for: int
+    points_against: int
+    points_for_per_game: float
+    points_against_per_game: float
+    win_pct: float
+    home_wins: int
+    home_losses: int
+    home_ties: int
+    away_wins: int
+    away_losses: int
+    away_ties: int
+
+
+class MatchupPrediction(BaseModel):
+    season: int
+    games_sampled: int
+    team_a: MatchupTeamStats
+    team_b: MatchupTeamStats
+    home_team: str
+    probability_a: float
+    probability_b: float
+    expected_points_a: float
+    expected_points_b: float
+    expected_margin_a: float
+    home_field_advantage: float
+    margin_std_dev: float
+
+
+class TeamSeasonRecord(TypedDict):
+    games: int
+    wins: int
+    losses: int
+    ties: int
+    points_for: int
+    points_against: int
+    home_wins: int
+    home_losses: int
+    home_ties: int
+    away_wins: int
+    away_losses: int
+    away_ties: int
+
+
+SCHEDULE_TEAM_ALIASES = {"LAR": "LA"}
+DEFAULT_MARGIN_STD_DEV = 13.5
+
+
+def _new_team_season_record() -> TeamSeasonRecord:
+    return {
+        "games": 0,
+        "wins": 0,
+        "losses": 0,
+        "ties": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "home_wins": 0,
+        "home_losses": 0,
+        "home_ties": 0,
+        "away_wins": 0,
+        "away_losses": 0,
+        "away_ties": 0,
+    }
+
+
+def _matchup_team_stats(team: str, record: TeamSeasonRecord) -> MatchupTeamStats:
+    games = record["games"]
+    return MatchupTeamStats(
+        team=team,
+        games=games,
+        wins=record["wins"],
+        losses=record["losses"],
+        ties=record["ties"],
+        points_for=record["points_for"],
+        points_against=record["points_against"],
+        points_for_per_game=record["points_for"] / games,
+        points_against_per_game=record["points_against"] / games,
+        win_pct=(record["wins"] + record["ties"] / 2) / games,
+        home_wins=record["home_wins"],
+        home_losses=record["home_losses"],
+        home_ties=record["home_ties"],
+        away_wins=record["away_wins"],
+        away_losses=record["away_losses"],
+        away_ties=record["away_ties"],
+    )
+
+
 def load_completed_schedule(season: int) -> pl.DataFrame:
     try:
         schedule = nfl.load_schedules(season)
@@ -240,6 +333,103 @@ def get_past_plays(game_id: str) -> list[PastPlay]:
             continue
         replay.append(play)
     return replay
+
+
+@app.get("/predict/matchup")
+def predict_matchup(
+    team_a: Annotated[str, Query(min_length=2, max_length=3, pattern=r"^[A-Z]{2,3}$")],
+    team_b: Annotated[str, Query(min_length=2, max_length=3, pattern=r"^[A-Z]{2,3}$")],
+    season: Annotated[int, Query(ge=1999)],
+    home_team: Annotated[str, Query(min_length=2, max_length=3, pattern=r"^[A-Z]{2,3}$")],
+) -> MatchupPrediction:
+    if team_a == team_b:
+        raise HTTPException(status_code=422, detail="Choose two different teams.")
+    if home_team not in (team_a, team_b):
+        raise HTTPException(status_code=422, detail="The home team must be one of the selected teams.")
+
+    completed = load_completed_schedule(season).filter(pl.col("game_type") == "REG")
+    if completed.is_empty():
+        raise HTTPException(
+            status_code=422,
+            detail=f"No completed regular-season games are available for {season}.",
+        )
+
+    records: dict[str, TeamSeasonRecord] = {}
+    game_margins: list[float] = []
+    for game in completed.iter_rows(named=True):
+        home_code = game["home_team"]
+        away_code = game["away_team"]
+        home_score = int(game["home_score"])
+        away_score = int(game["away_score"])
+        game_margins.append(float(home_score - away_score))
+
+        home_record = records.setdefault(home_code, _new_team_season_record())
+        away_record = records.setdefault(away_code, _new_team_season_record())
+        home_record["games"] += 1
+        away_record["games"] += 1
+        home_record["points_for"] += home_score
+        home_record["points_against"] += away_score
+        away_record["points_for"] += away_score
+        away_record["points_against"] += home_score
+
+        if home_score == away_score:
+            home_record["ties"] += 1
+            home_record["home_ties"] += 1
+            away_record["ties"] += 1
+            away_record["away_ties"] += 1
+        elif home_score > away_score:
+            home_record["wins"] += 1
+            home_record["home_wins"] += 1
+            away_record["losses"] += 1
+            away_record["away_losses"] += 1
+        else:
+            away_record["wins"] += 1
+            away_record["away_wins"] += 1
+            home_record["losses"] += 1
+            home_record["home_losses"] += 1
+
+    schedule_team_a = SCHEDULE_TEAM_ALIASES.get(team_a, team_a)
+    schedule_team_b = SCHEDULE_TEAM_ALIASES.get(team_b, team_b)
+    if schedule_team_a not in records or schedule_team_b not in records:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Both teams need at least one completed regular-season game in {season}.",
+        )
+
+    stats_a = _matchup_team_stats(team_a, records[schedule_team_a])
+    stats_b = _matchup_team_stats(team_b, records[schedule_team_b])
+    home_advantage = sum(game_margins) / len(game_margins)
+    margin_std_dev = (
+        sqrt(sum((margin - home_advantage) ** 2 for margin in game_margins) / len(game_margins))
+        if len(game_margins) > 1
+        else DEFAULT_MARGIN_STD_DEV
+    )
+    if margin_std_dev == 0:
+        margin_std_dev = DEFAULT_MARGIN_STD_DEV
+
+    neutral_points_a = (stats_a.points_for_per_game + stats_b.points_against_per_game) / 2
+    neutral_points_b = (stats_b.points_for_per_game + stats_a.points_against_per_game) / 2
+    home_adjustment = home_advantage / 2
+    expected_points_a = neutral_points_a + (home_adjustment if home_team == team_a else -home_adjustment)
+    expected_points_b = neutral_points_b + (home_adjustment if home_team == team_b else -home_adjustment)
+    expected_margin_a = expected_points_a - expected_points_b
+    probability_a = 0.5 * (1 + erf(expected_margin_a / (margin_std_dev * sqrt(2))))
+    probability_a_pct = round(probability_a * 100, 1)
+
+    return MatchupPrediction(
+        season=season,
+        games_sampled=len(game_margins),
+        team_a=stats_a,
+        team_b=stats_b,
+        home_team=home_team,
+        probability_a=probability_a_pct,
+        probability_b=round(100 - probability_a_pct, 1),
+        expected_points_a=round(expected_points_a, 1),
+        expected_points_b=round(expected_points_b, 1),
+        expected_margin_a=round(expected_margin_a, 1),
+        home_field_advantage=round(home_advantage, 1),
+        margin_std_dev=round(margin_std_dev, 1),
+    )
 
 
 # get standings data, the format is the same of Google NFL standings widget
